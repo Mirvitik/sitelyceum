@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="static/css/style.css">
+{% if current_user.is_authenticated %}
+<p>Вы вошли под id {{ current_user.id }}</p>
+{% else %}
+<p>Войдите на платформу через страницу /login</p>
+{% endif %}
+{% endblock %}
