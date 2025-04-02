@@ -1,14 +1,17 @@
 # в файл .env в переменную PASSWORD вставьте ключ, который я прислал в чате для работы email рассылки
 import random
-
+from werkzeug.security import generate_password_hash
 from flask import Flask, request, render_template, redirect, send_from_directory, session
 import os
 from dotenv import load_dotenv
 import datetime
 from data import db_session
 from data.users import User
+from data.notebooks import Notebook
+from forms.notebookform import NotebookForm
 from mail_sender import send_mail
-from flask_login import LoginManager, login_required, logout_user, login_user
+from flask_login import LoginManager, login_required, logout_user, login_user, current_user
+from flask_restful import abort
 from forms.loginform import LoginForm
 from forms.regform import RegForm
 from forms.codeform import CodeForm
@@ -72,7 +75,9 @@ def success():
 @app.route('/reg', methods=['GET', 'POST'])
 def reg():
     form = RegForm()
-    if form.validate_on_submit() and form.password.data == form.password2.data:
+    db_sess = db_session.create_session()
+    if form.validate_on_submit() and form.password.data == form.password2.data and db_sess.query(User).filter(
+            User.email == form.email.data).first() is not None:
         session['code'] = ''.join(
             map(str, [random.randint(0, 9) for _ in range(6)]))  # создаём код верификации в session
         send_mail(form.email.data, 'code', session['code'], [])
@@ -81,9 +86,8 @@ def reg():
         user = User(surname=form.surname.data,
                     name=form.name.data,
                     email=form.email.data,
-                    hashed_password=form.password.data
+                    hashed_password=generate_password_hash(form.password.data)
                     )
-        db_sess = db_session.create_session()
         db_sess.add(user)
         db_sess.commit()
         logout_user()
@@ -91,7 +95,7 @@ def reg():
     return render_template('reg.html', form=form, title='Зарегистрируйся бесплатно')
 
 
-@app.route('/codeverify', methods=['GET', 'POST'])
+@app.route('/codeverify', methods=['GET', 'POST'])  # пользователь вводит код из имейла
 def codeverify():
     form = CodeForm()
     if form.validate_on_submit() and form.code.data == session['code']:
@@ -100,6 +104,23 @@ def codeverify():
         login_user(user, remember=session['remember'])
         return redirect('/')
     return render_template('code.html', form=form)
+
+
+@app.route('/notebook_add', methods=['GET', 'POST'])
+@login_required
+def notebook_add():
+    form = NotebookForm()
+    if form.validate_on_submit():
+        db_sess = db_session.create_session()
+        notebook = Notebook(model=form.model.data,
+                            company=form.company.data,
+                            price=form.price.data,
+                            description=form.description.data,
+                            user_id=current_user.id)
+        db_sess.add(notebook)
+        current_user.notebooks.append(notebook)
+        db_sess.commit()
+    return render_template('notebookadd.html', form=form)
 
 
 @app.route('/about')
@@ -119,7 +140,7 @@ def contact():
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return "Page not found. Go back and try again.", 404
+    return render_template('404.html'), 404
 
 
 @app.route('/logout')
