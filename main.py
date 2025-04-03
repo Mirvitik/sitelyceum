@@ -38,7 +38,7 @@ def favicon():
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', items=session['items'])
 
 
 @app.route('/mail', methods=['GET'])  # пример email рассылки. Вставьте почту в поле
@@ -129,9 +129,12 @@ def notebook_add():
                             price=form.price.data,
                             description=form.description.data,
                             user_id=current_user.id)
-        db_sess.add(notebook)
         current_user.notebooks.append(notebook)
+        db_sess.merge(current_user)
         db_sess.commit()
+        items = db_sess.query(Notebook).all()
+        session['items'] = [el.to_dict(only=('id', 'model', 'company', 'price', 'description')) for el in items]
+        return redirect('/')
     return render_template('notebookadd.html', form=form)
 
 
