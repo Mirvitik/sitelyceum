@@ -59,11 +59,19 @@ def post_form():
 def login():
     form = LoginForm()
     db_sess = db_session.create_session()
-    if form.validate_on_submit() and bool(db_sess.query(User).filter(User.email == form.email.data,
-                                                                     User.hashed_password == form.password.data).first()):
-        print(db_sess.query(User).filter(User.email == form.email.data).first())
-        login_user(db_sess.query(User).filter(User.email == form.email.data).first(), remember=form.remember_me.data)
-        return redirect('/success')
+    if form.validate_on_submit() and bool(db_sess.query(User).filter(User.email == form.email.data).first()):
+        if bool(db_sess.query(User).filter(User.email == form.email.data).first()):
+            user = db_sess.query(User).filter(User.email == form.email.data).first()
+            if user.check_password(form.password.data):
+                print(db_sess.query(User).filter(User.email == form.email.data).first())
+                login_user(db_sess.query(User).filter(User.email == form.email.data).first(),
+                           remember=form.remember_me.data)
+                return redirect('/success')
+            else:
+                return render_template('login.html', title='Авторизация', form=form,
+                                       message='Неверный логин или пароль')
+        else:
+            return render_template('login.html', title='Авторизация', form=form, message='Неверный логин или пароль')
     return render_template('login.html', title='Авторизация', form=form)
 
 
@@ -76,20 +84,18 @@ def success():
 def reg():
     form = RegForm()
     db_sess = db_session.create_session()
-    if form.validate_on_submit() and form.password.data == form.password2.data and db_sess.query(User).filter(
-            User.email == form.email.data).first() is not None:
+    if form.validate_on_submit() and form.password.data == form.password2.data:
+        if db_sess.query(User).filter(User.email == form.email.data).first() is not None:
+            return render_template('reg.html', form=form, title='Зарегистрируйся бесплатно',
+                                   message='Пользователь с такой почтой уже зарегистрирован')
         session['code'] = ''.join(
             map(str, [random.randint(0, 9) for _ in range(6)]))  # создаём код верификации в session
         send_mail(form.email.data, 'code', session['code'], [])
         session['remember'] = form.remember_me.data
         session['email'] = form.email.data
-        user = User(surname=form.surname.data,
-                    name=form.name.data,
-                    email=form.email.data,
-                    hashed_password=generate_password_hash(form.password.data)
-                    )
-        db_sess.add(user)
-        db_sess.commit()
+        session['surname'] = form.surname.data
+        session['name'] = form.name.data
+        session['hashed_password'] = generate_password_hash(form.password.data)
         logout_user()
         return redirect('/codeverify')
     return render_template('reg.html', form=form, title='Зарегистрируйся бесплатно')
@@ -100,7 +106,13 @@ def codeverify():
     form = CodeForm()
     if form.validate_on_submit() and form.code.data == session['code']:
         db_sess = db_session.create_session()
-        user = db_sess.query(User).filter(User.email == session['email']).first()
+        user = User(surname=session['surname'],
+                    name=session['name'],
+                    email=session['email'],
+                    hashed_password=session['hashed_password']
+                    )
+        db_sess.add(user)
+        db_sess.commit()
         login_user(user, remember=session['remember'])
         return redirect('/')
     return render_template('code.html', form=form)

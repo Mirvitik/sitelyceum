@@ -1,18 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <form action="" method="post" novalidate>
-        <div>
-            {{ form.csrf_token }}
-        </div >
-        {% for field in form if field.name != 'csrf_token' %}
-            <div align="center">
-                {{ field.label() }}
-                {{ field() }}
-                {% for error in field.errors %}
-                    <div align="center" class="error">{{ error }}</div>
-                {% endfor %}
-            </div>
+<form action="" method="post" novalidate>
+    <div>
+        {{ form.csrf_token }}
+    </div>
+    {% for field in form if field.name != 'csrf_token' %}
+    <div align="center">
+        {{ field.label() }}
+        {{ field() }}
+        {% for error in field.errors %}
+        <div align="center" class="error">{{ error }}</div>
         {% endfor %}
-    </form>
+    </div>
+    {% endfor %}
+</form>
+{% if message %}
+<div class="alert alert-danger" role="alert">{{ message }}</div>
+{% endif %}
 {% endblock %}

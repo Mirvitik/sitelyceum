@@ -15,4 +15,7 @@
     </div>
     {% endfor %}
 </form>
+{% if message %}
+<div class="alert alert-danger" role="alert">{{ message }}</div>
+{% endif %}
 {% endblock %}

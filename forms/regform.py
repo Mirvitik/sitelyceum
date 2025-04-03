@@ -11,4 +11,4 @@ class RegForm(FlaskForm):
     password2 = PasswordField('Повторите пароль', validators=[DataRequired()])
     remember_me = BooleanField('Запомнить меня')
     recaptcha = RecaptchaField()
-    submit = SubmitField('Войти')
+    submit = SubmitField('Зарегистрироваться')
