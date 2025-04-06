@@ -38,6 +38,10 @@ def favicon():
 @app.route('/')
 @app.route('/index')
 def index():
+    db_sess = db_session.create_session()
+    items = db_sess.query(Notebook).all()
+    session['items'] = [el.to_dict(only=('id', 'model', 'company', 'price', 'description')) for el in items]
+    db_sess.close()
     return render_template('index.html', items=session['items'])
 
 
@@ -66,12 +70,16 @@ def login():
                 print(db_sess.query(User).filter(User.email == form.email.data).first())
                 login_user(db_sess.query(User).filter(User.email == form.email.data).first(),
                            remember=form.remember_me.data)
+                db_sess.close()
                 return redirect('/success')
             else:
+                db_sess.close()
                 return render_template('login.html', title='Авторизация', form=form,
                                        message='Неверный логин или пароль')
         else:
+            db_sess.close()
             return render_template('login.html', title='Авторизация', form=form, message='Неверный логин или пароль')
+    db_sess.close()
     return render_template('login.html', title='Авторизация', form=form)
 
 
@@ -88,6 +96,25 @@ def reg():
         if db_sess.query(User).filter(User.email == form.email.data).first() is not None:
             return render_template('reg.html', form=form, title='Зарегистрируйся бесплатно',
                                    message='Пользователь с такой почтой уже зарегистрирован')
+        if request.method == 'POST':
+            # check if the post request has the file part
+            if 'profile_picture' in request.files:
+                file = request.files['profile_picture']
+                # if user does not select file, browser also
+                # submit a empty part without filename
+                if file.filename != '':
+                    maxid = db_sess.query(User).order_by(
+                        User.id.desc()).first()
+                    if maxid is None:
+                        maxid = 1
+                    else:
+                        maxid += 1
+                    if file.filename.endswith('png'):
+                        file.save(os.path.join('static/img/avatars', f'{maxid}.png'))
+                    elif file.filename.endswith('jpeg'):
+                        file.save(os.path.join('static/img/avatars', f'{maxid}.jpeg'))
+                    elif file.filename.endswith('jpg'):
+                        file.save(os.path.join('static/img/avatars', f'{maxid}.jpeg'))
         session['code'] = ''.join(
             map(str, [random.randint(0, 9) for _ in range(6)]))  # создаём код верификации в session
         send_mail(form.email.data, 'code', session['code'], [])
@@ -134,6 +161,7 @@ def notebook_add():
         db_sess.commit()
         items = db_sess.query(Notebook).all()
         session['items'] = [el.to_dict(only=('id', 'model', 'company', 'price', 'description')) for el in items]
+        db_sess.close()
         return redirect('/')
     return render_template('notebookadd.html', form=form)
 
