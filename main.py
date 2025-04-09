@@ -199,6 +199,61 @@ def load_user(user_id):
     return db_sess.query(User).get(user_id)
 
 
+@app.route('/profile/<int:user_id>', methods=['GET'])
+@login_required
+def view_profile(user_id):
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        return render_template('404.html'), 404  # User not found
+
+    return render_template('profile.html', user=user)
+
+
+@app.route('/profile/edit/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def edit_profile(user_id):
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        return render_template('404.html'), 404  # User not found
+
+    form = RegForm()  # Assuming RegForm is used for updating user info
+
+    if request.method == 'POST' and form.validate_on_submit():
+        user.name = form.name.data
+        user.surname = form.surname.data
+        user.email = form.email.data
+
+        if form.password.data:
+            user.hashed_password = generate_password_hash(form.password.data)
+
+        if 'profile_picture' in request.files:
+            file = request.files['profile_picture']
+            if file.filename != '':
+                maxid = db_sess.query(User).order_by(User.id.desc()).first()
+                if maxid is None:
+                    maxid = 1
+                else:
+                    maxid += 1
+                if file.filename.endswith('png'):
+                    file.save(os.path.join('static/img/avatars', f'{maxid}.png'))
+                elif file.filename.endswith('jpeg') or file.filename.endswith('jpg'):
+                    file.save(os.path.join('static/img/avatars', f'{maxid}.jpeg'))
+
+        db_sess.commit()
+        return redirect(f'/profile/{user.id}')
+
+    # Pre-fill the form with current user's data
+    form.name.data = user.name
+    form.surname.data = user.surname
+    form.email.data = user.email
+
+    return render_template('edit_profile.html', title='Edit Profile', form=form, user=user)
+
+
 if __name__ == '__main__':
     db_session.global_init('db/users.db')
     port = int(os.environ.get("PORT", 5000))
