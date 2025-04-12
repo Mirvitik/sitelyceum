@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль - LightWeb</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #e63946;
+            --secondary: #1d3557;
+            --light: #f1faee;
+            --accent: #a8dadc;
+            --dark: #1d3557;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .profile-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .profile-title {
+            color: var(--secondary);
+            margin: 0;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.7rem 1.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .profile-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        .profile-avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 1.5rem;
+            display: block;
+        }
+
+        .profile-info {
+            margin-bottom: 2rem;
+        }
+
+        .profile-info-item {
+            margin-bottom: 1rem;
+        }
+
+        .profile-info-label {
+            font-weight: 600;
+            color: var(--secondary);
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+
+        .profile-info-value {
+            padding: 0.5rem;
+            background: var(--light);
+            border-radius: 5px;
+        }
+
+        .edit-form {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .notebooks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .notebook-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+
+        .notebook-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .notebook-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .notebook-content {
+            padding: 1.5rem;
+        }
+
+        .notebook-title {
+            margin-top: 0;
+            color: var(--secondary);
+        }
+
+        .notebook-price {
+            font-weight: bold;
+            color: var(--primary);
+            margin: 0.5rem 0;
+        }
+
+        .notebook-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .flash-messages {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .flash-message {
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 5px;
+            color: white;
+            animation: slideIn 0.3s;
+        }
+
+        .success {
+            background-color: #28a745;
+        }
+
+        .danger {
+            background-color: #dc3545;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <!-- Flash сообщения -->
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <div class="profile-header">
+            <h1 class="profile-title">Личный кабинет</h1>
+            <div class="profile-actions">
+                <a href="{{ url_for('index') }}" class="btn btn-outline">На главную</a>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Выйти</a>
+            </div>
+        </div>
+
+        <div class="profile-content">
+            <!-- Боковая панель с информацией о пользователе -->
+            <div class="profile-card">
+                <img src="{{ url_for('static', filename='uploads/avatars/' + (user.avatar if user.avatar else 'default.png')) }}" 
+                     alt="Аватар" class="profile-avatar">
+                
+                <div class="profile-info">
+                    <div class="profile-info-item">
+                        <span class="profile-info-label">Имя:</span>
+                        <div class="profile-info-value" id="name-value">
+                            {{ user.first_name }} {{ user.last_name }}
+                        </div>
+                        <div class="edit-form" id="name-edit">
+                            <input type="text" class="form-control" id="name-input" 
+                                   value="{{ user.first_name }}" placeholder="Имя">
+                            <input type="text" class="form-control" id="surname-input" 
+                                   value="{{ user.last_name }}" placeholder="Фамилия">
+                            <button class="btn btn-primary" onclick="saveProfile('name')">Сохранить</button>
+                        </div>
+                    </div>
+
+                    <div class="profile-info-item">
+                        <span class="profile-info-label">Email:</span>
+                        <div class="profile-info-value">{{ user.email }}</div>
+                    </div>
+
+                    <div class="profile-info-item">
+                        <span class="profile-info-label">Телефон:</span>
+                        <div class="profile-info-value" id="phone-value">
+                            {{ user.phone }}
+                        </div>
+                        <div class="edit-form" id="phone-edit">
+                            <input type="tel" class="form-control" id="phone-input" 
+                                   value="{{ user.phone }}" placeholder="Телефон">
+                            <button class="btn btn-primary" onclick="saveProfile('phone')">Сохранить</button>
+                        </div>
+                    </div>
+
+                    <div class="profile-info-item">
+                        <span class="profile-info-label">Дата регистрации:</span>
+                        <div class="profile-info-value">
+                            {{ user.created_at.strftime('%d.%m.%Y') }}
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn btn-outline" onclick="toggleEdit('name')">
+                    <i class="fas fa-edit"></i> Изменить имя
+                </button>
+                <button class="btn btn-outline" onclick="toggleEdit('phone')">
+                    <i class="fas fa-edit"></i> Изменить телефон
+                </button>
+
+                <div class="form-group" style="margin-top: 2rem;">
+                    <form action="{{ url_for('upload_avatar') }}" method="POST" enctype="multipart/form-data">
+                        <label for="avatar" class="btn btn-primary">
+                            <i class="fas fa-camera"></i> Сменить аватар
+                        </label>
+                        <input type="file" id="avatar" name="avatar" accept="image/*" 
+                               style="display: none;" onchange="this.form.submit()">
+                    </form>
+                </div>
+            </div>
+
+            <!-- Основной контент - ноутбуки пользователя -->
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2 style="margin: 0;">Мои ноутбуки</h2>
+                    <a href="{{ url_for('add_notebook') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Добавить ноутбук
+                    </a>
+                </div>
+
+                {% if notebooks %}
+                <div class="notebooks-grid">
+                    {% for notebook in notebooks %}
+                    <div class="notebook-card">
+                        <img src="{{ notebook.get_image_url() }}" alt="{{ notebook.company }} {{ notebook.model }}" 
+                             class="notebook-image">
+                        <div class="notebook-content">
+                            <h3 class="notebook-title">{{ notebook.company }} {{ notebook.model }}</h3>
+                            <div class="notebook-price">{{ notebook.price }} руб.</div>
+                            <p>{{ notebook.description }}</p>
+                            <div class="notebook-actions">
+                                <a href="{{ url_for('edit_notebook', notebook_id=notebook.id) }}" 
+                                   class="btn btn-outline">Редактировать</a>
+                                <form action="{{ url_for('delete_notebook', notebook_id=notebook.id) }}" 
+                                      method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-danger">Удалить</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="profile-card" style="text-align: center; padding: 3rem;">
+                    <p style="font-size: 1.2rem;">У вас пока нет добавленных ноутбуков</p>
+                    <a href="{{ url_for('add_notebook') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Добавить первый ноутбук
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Функции для редактирования профиля
+        function toggleEdit(field) {
+            const valueEl = document.getElementById(`${field}-value`);
+            const editEl = document.getElementById(`${field}-edit`);
+            
+            if (valueEl.style.display === 'none') {
+                valueEl.style.display = 'block';
+                editEl.style.display = 'none';
+            } else {
+                valueEl.style.display = 'none';
+                editEl.style.display = 'block';
+            }
+        }
+
+        async function saveProfile(field) {
+            let data = {};
+            if (field === 'name') {
+                data = {
+                    first_name: document.getElementById('name-input').value,
+                    last_name: document.getElementById('surname-input').value
+                };
+            } else if (field === 'phone') {
+                data = { phone: document.getElementById('phone-input').value };
+            }
+
+            try {
+                const response = await fetch('/update_profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    location.reload();
+                } else {
+                    alert(result.message || 'Ошибка при обновлении профиля');
+                }
+            } catch (error) {
+                alert('Ошибка сети: ' + error.message);
+            }
+        }
+
+        // Автоматическое скрытие flash сообщений через 5 секунд
+        setTimeout(() => {
+            const flashes = document.querySelectorAll('.flash-message');
+            flashes.forEach(flash => {
+                flash.style.opacity = '0';
+                setTimeout(() => flash.remove(), 500);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

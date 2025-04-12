@@ -6,7 +6,6 @@ SqlAlchemyBase = orm.declarative_base()
 
 __factory = None
 
-
 def global_init(db_file):
     global __factory
 
@@ -19,14 +18,14 @@ def global_init(db_file):
     conn_str = f'sqlite:///{db_file.strip()}?check_same_thread=False'
     print(f"Подключение к базе данных по адресу {conn_str}")
 
-    engine = sa.create_engine(conn_str, echo=False, pool_size=10, max_overflow=20)
+    engine = sa.create_engine(conn_str, echo=False)
     __factory = orm.sessionmaker(bind=engine)
 
-    from . import __all_models
-
+    from . import users
     SqlAlchemyBase.metadata.create_all(engine)
-
 
 def create_session() -> Session:
     global __factory
+    if not __factory:
+        raise Exception("База данных не инициализирована. Сначала вызовите global_init().")
     return __factory()

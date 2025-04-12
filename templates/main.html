@@ -6,6 +6,50 @@
     <title>LightWeb - Продажа Ноутбуков</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        .flash-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1100;
+            max-width: 400px;
+        }
+
+        .flash-message {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            color: white;
+            animation: slideIn 0.3s, fadeOut 0.5s 4.5s forwards;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .success {
+            background-color: #28a745;
+        }
+
+        .danger {
+            background-color: #dc3545;
+        }
+
+        .warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .info {
+            background-color: #17a2b8;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
         :root {
             --primary: #e63946;
             --secondary: #1d3557;
@@ -502,29 +546,36 @@
     </style>
 </head>
 <body>
-
+    <!-- Flash сообщения -->
+    <div class="flash-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
 <header>
     <div class="header-container">
         <div class="header-top">
-            <div class="auth-buttons">
-                <a href="#login" class="auth-btn login"><i class="fas fa-sign-in-alt"></i> Войти</a>
-                <a href="#register" class="auth-btn register"><i class="fas fa-user-plus"></i> Регистрация</a>
-            </div>
-
-            <!-- Этот блок будет показан после авторизации вместо auth-buttons -->
-            <!-- <div class="user-menu">
+            {% if 'user_id' in session %}
+            <div class="user-menu">
                 <button class="user-btn">
                     <i class="fas fa-user-circle"></i>
-                    <span>Иван Иванов</span>
+                    <span>{{ session.get('user_name', 'Пользователь') }}</span>
                 </button>
                 <div class="user-dropdown">
-                    <a href="#profile"><i class="fas fa-user"></i> Личный кабинет</a>
-                    <a href="#orders"><i class="fas fa-shopping-bag"></i> Мои заказы</a>
-                    <a href="#settings"><i class="fas fa-cog"></i> Настройки</a>
-                    <a href="#seller"><i class="fas fa-store"></i> Стать продавцом</a>
-                    <a href="#logout"><i class="fas fa-sign-out-alt"></i> Выйти</a>
+                    <a href="{{ url_for('profile') }}"><i class="fas fa-user"></i> Личный кабинет</a>
+                    <a href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Выйти</a>
                 </div>
-            </div> -->
+            </div>
+            {% else %}
+            <div class="auth-buttons">
+                <a href="{{ url_for('login') }}" class="auth-btn login"><i class="fas fa-sign-in-alt"></i> Войти</a>
+                <a href="{{ url_for('register') }}" class="auth-btn register"><i class="fas fa-user-plus"></i> Регистрация</a>
+            </div>
+            {% endif %}
         </div>
 
         <div class="logo">Light<span>Web</span></div>
@@ -550,38 +601,20 @@
 <section id="catalog">
     <h2>Каталог ноутбуков</h2>
     <div class="product-grid">
+        {% for notebook in notebooks %}
         <div class="product">
-            <div class="product-badge">Хит продаж</div>
             <div class="product-img-container">
-                <img src="https://images.unsplash.com/photo-1593642632823-8f785ba67e45?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Ноутбук Ultra Pro">
+                <img src="{{ notebook.get_image_url() }}" alt="{{ notebook.company }} {{ notebook.model }}"
+                             class="notebook-image">
             </div>
             <div class="product-info">
-                <h3>Ultra Pro X9</h3>
-                <p>Мощный игровой ноутбук с процессором Intel Core i9 и видеокартой RTX 3080. Идеален для геймеров и профессионалов.</p>
+                <h3>{{ notebook.company }} {{ notebook.model }}</h3>
+                <p><strong>Цена:</strong> {{ notebook.price }} руб.</p>
+                <p>{{ notebook.description }}</p>
                 <a href="#" class="btn">Подробнее</a>
             </div>
         </div>
-        <div class="product">
-            <div class="product-img-container">
-                <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Ноутбук Slim Air">
-            </div>
-            <div class="product-info">
-                <h3>Slim Air M2</h3>
-                <p>Ультратонкий и легкий ноутбук с дисплеем 4K. Идеальный выбор для путешествий и работы в дороге.</p>
-                <a href="#" class="btn">Подробнее</a>
-            </div>
-        </div>
-        <div class="product">
-            <div class="product-badge">Новинка</div>
-            <div class="product-img-container">
-                <img src="https://images.unsplash.com/photo-1517059224940-d4af9eec41b7?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Ноутбук Business Elite">
-            </div>
-            <div class="product-info">
-                <h3>Business Elite</h3>
-                <p>Надежный ноутбук для бизнеса с расширенной гарантией и профессиональной поддержкой 24/7.</p>
-                <a href="#" class="btn">Подробнее</a>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 </section>
 

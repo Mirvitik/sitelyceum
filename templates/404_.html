@@ -1,0 +1,9 @@
+{% extends "main.html" %}
+
+{% block content %}
+<div class="error-container">
+    <h2>404 - Страница не найдена</h2>
+    <p>Запрошенная страница не существует или была перемещена.</p>
+    <a href="{{ url_for('index') }}" class="btn">На главную</a>
+</div>
+{% endblock %}
