@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="product-section">
+    <div class="product-hero">
+        <img class="d-block w-100" src="../{{ item.get_image_url() }}" alt="Первый слайд">
+        <div class="product-details">
+            <span class="product-badge">Хит продаж</span>
+            <h1 class="product-title">{{item.model}}</h1>
+            <div class="product-rating">
+                <div class="product-rating-stars">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-alt"></i>
+                </div>
+            </div>
+            <div class="product-price">{{ item.price }}₽</div>
+            <p>{{item.description}}</p>
+
+            <div class="product-actions">
+                <a href="mailto:{{ seller.email }}?subject=Я хочу ноутбук&body=Здравствуйте" class="btn"
+                   style="flex: 1; min-width: 200px;"><i class="fas fa-shopping-cart"></i>
+                    Написать продавцу</a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

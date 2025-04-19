@@ -4,7 +4,6 @@ from data.db_session import create_session
 from data.users import User
 from data.notebooks import Notebook
 from functools import wraps
-import datetime
 
 api = Blueprint('api', __name__)
 

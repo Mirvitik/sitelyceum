@@ -304,10 +304,10 @@
                 <div class="notebooks-grid">
                     {% for notebook in notebooks %}
                     <div class="notebook-card">
-                        <img src="{{ notebook.get_image_url() }}" alt="{{ notebook.company }} {{ notebook.model }}" 
+                        <img src="../{{notebook.get_image_url() }}" alt="{{ notebook.company }} {{ notebook.model }}"
                              class="notebook-image">
                         <div class="notebook-content">
-                            <h3 class="notebook-title">{{ notebook.company }} {{ notebook.model }}</h3>
+                            <h3 class="notebook-title">{{ notebook.company }} {{ notebook.model }} {{ notebook.get_image_url() }}</h3>
                             <div class="notebook-price">{{ notebook.price }} руб.</div>
                             <p>{{ notebook.description }}</p>
                             <div class="notebook-actions">

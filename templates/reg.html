@@ -1,417 +1,49 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LightWeb - Регистрация</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        .flash-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1100;
-            max-width: 400px;
-        }
+{% extends "base.html" %}
 
-        .flash-message {
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            color: white;
-            animation: slideIn 0.3s, fadeOut 0.5s 4.5s forwards;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .success {
-            background-color: #28a745;
-        }
-
-        .danger {
-            background-color: #dc3545;
-        }
-
-        .warning {
-            background-color: #ffc107;
-            color: #212529;
-        }
-
-        .info {
-            background-color: #17a2b8;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes fadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-
-        :root {
-            --primary: #e63946;
-            --secondary: #1d3557;
-            --light: #f1faee;
-            --accent: #a8dadc;
-            --dark: #1d3557;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f9fa;
-            color: #333;
-            line-height: 1.6;
-        }
-
-        header {
-            background: linear-gradient(135deg, var(--secondary), var(--dark));
-            padding: 1rem 0;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .header-container {
-            display: flex;
-            flex-direction: column;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1rem;
-        }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .auth-buttons {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .auth-btn {
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            text-decoration: none;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
-        }
-
-        .auth-btn.login {
-            background-color: transparent;
-            color: white;
-            border: 1px solid white;
-        }
-
-        .auth-btn.login:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .auth-btn.register {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .auth-btn.register:hover {
-            background-color: #d62839;
-        }
-
-        .logo {
-            color: white;
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-            transition: transform 0.3s;
-        }
-
-        .logo:hover {
-            transform: scale(1.05);
-        }
-
-        .logo span {
-            color: var(--primary);
-        }
-
-        nav {
-            margin: 1rem 0;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        nav a {
-            margin: 0 1rem;
-            text-decoration: none;
-            color: white;
-            font-weight: 500;
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        nav a:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-        }
-
-        nav a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: 0;
-            left: 0;
-            background-color: var(--primary);
-            transition: width 0.3s;
-        }
-
-        nav a:hover::after {
-            width: 100%;
-        }
-
-        .register-container {
-            max-width: 600px;
-            margin: 3rem auto;
-            padding: 2.5rem;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            animation: fadeIn 0.6s ease-out forwards;
-        }
-
-        .register-container h2 {
-            color: var(--secondary);
-            text-align: center;
-            margin-bottom: 2rem;
-            position: relative;
-            padding-bottom: 0.5rem;
-        }
-
-        .register-container h2::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            bottom: 0;
-            width: 50px;
-            height: 3px;
-            background-color: var(--primary);
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--secondary);
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-
-        .form-control:focus {
-            border-color: var(--accent);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(168, 218, 220, 0.3);
-        }
-
-        .form-row {
-            display: flex;
-            gap: 1.5rem;
-        }
-
-        .form-row .form-group {
-            flex: 1;
-        }
-
-        .btn {
-            display: inline-block;
-            background-color: var(--primary);
-            color: white;
-            padding: 0.7rem 1.5rem;
-            border-radius: 50px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
-            width: 100%;
-            font-size: 1rem;
-        }
-
-        .btn:hover {
-            background-color: var(--dark);
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .btn-outline {
-            background-color: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-        }
-
-        .btn-outline:hover {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .register-footer {
-            text-align: center;
-            margin-top: 1.5rem;
-            color: #666;
-        }
-
-        .register-footer a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .register-footer a:hover {
-            text-decoration: underline;
-        }
-
-        .terms {
-            margin-top: 1.5rem;
-            font-size: 0.9rem;
-            color: #666;
-            text-align: center;
-        }
-
-        .terms a {
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        .terms a:hover {
-            text-decoration: underline;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @media (max-width: 768px) {
-            .header-top {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .auth-buttons {
-                margin-top: 1rem;
-                margin-bottom: 1rem;
-            }
-
-            nav a {
-                margin: 0.5rem;
-                padding: 0.5rem;
-            }
-
-            .register-container {
-                padding: 1.5rem;
-                margin: 1.5rem;
-            }
-
-            .form-row {
-                flex-direction: column;
-                gap: 0;
-            }
-        }
-        #g-recaptcha-response {
-            display: block !important;
-            position: absolute;
-            margin: -78px 0 0 0 !important;
-            width: 302px !important;
-            height: 76px !important;
-            z-index: -999999;
-            opacity: 0;
-        }
-    </style>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-</head>
-<body>
-    <!-- Flash сообщения -->
-    <div class="flash-container">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="flash-message {{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-    </div>
-<header>
-    <div class="header-container">
-        <div class="logo">Light<span>Web</span></div>
-        <nav>
-            <a href="index"><i class="fas fa-home"></i> Главная</a>
-            <a href="index#catalog"><i class="fas fa-laptop"></i> Каталог</a>
-            <a href="index#about"><i class="fas fa-info-circle"></i> О проекте</a>
-            <a href="index#contact"><i class="fas fa-headset"></i> Контакты</a>
-        </nav>
-    </div>
-</header>
-
+{% block content %}
 <div class="register-container">
     <h2>Создать аккаунт</h2>
     <form action="{{ url_for('register') }}" method="POST">
         <div class="form-row">
             <div class="form-group">
-                <label for="first-name">Имя</label>
-                <input type="text" id="first-name" name="first-name" class="form-control" placeholder="Введите ваше имя" required>
+                {{ form.first_name.label(for="first-name") }}<br>
+                {{ form.first_name(type="text", id="first-name", class="form-control", placeholder="Введите ваше имя")
+                }} <br>
             </div>
             <div class="form-group">
-                <label for="last-name">Фамилия</label>
-                <input type="text" id="last-name" name="last-name" class="form-control" placeholder="Введите вашу фамилию" required>
+                {{ form.last_name.label(for="last-name") }}<br>
+                {{ form.last_name(type="text", id="last-name", class="form-control", placeholder="Введите вашу
+                фамилию")
+                }} <br>
             </div>
         </div>
         <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" class="form-control" placeholder="Введите ваш email" required>
+            {{ form.email.label(for="email") }}<br>
+            {{ form.email(type="email", id="email", class="form-control", placeholder="Введите ваш email")
+            }} <br>
         </div>
         <div class="form-group">
-            <label for="phone">Телефон</label>
-            <input type="tel" id="phone" name="phone" class="form-control" placeholder="+7 (___) ___-__-__" required>
+            {{ form.phone.label(for="phone") }}<br>
+            {{ form.phone(type="tel", id="phone", class="form-control", placeholder="+7 (___) ___-__-__")
+            }} <br>
         </div>
         <div class="form-row">
             <div class="form-group">
-                <label for="password">Пароль</label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="Создайте пароль" required>
+                {{ form.password.label(for="password") }}<br>
+                {{ form.password( type="password", id="password", class="form-control", placeholder="Создайте пароль")
+                }} <br>
             </div>
             <div class="form-group">
-                <label for="confirm-password">Подтверждение пароля</label>
-                <input type="password" id="confirm-password" name="confirm-password" class="form-control" placeholder="Повторите пароль" required>
+                {{ form.confirm_password.label(for="confirm-password") }}<br>
+                {{ form.confirm_password(type="password", id="confirm-password", class="form-control",
+                placeholder="Повторите пароль")
+                }} <br>
             </div>
         </div>
+        {{ form.recaptcha }}
         <div class="form-group">
-            <div class="g-recaptcha" data-sitekey="6LfTle8qAAAAAEDmrvrsjVkNClyDNl7-p6m1OzDU"></div>
+            <button type="submit" class="btn">Зарегистрироваться</button>
         </div>
-        <div class="form-group"><button type="submit" class="btn">Зарегистрироваться</button></div>
     </form>
 
     <div class="register-footer">
@@ -419,7 +51,8 @@
     </div>
 
     <div class="terms">
-        <p>Нажимая кнопку "Зарегистрироваться", вы соглашаетесь с нашими <a href="#">Условиями использования</a> и <a href="#">Политикой конфиденциальности</a>.</p>
+        <p>Нажимая кнопку "Зарегистрироваться", вы соглашаетесь с нашими <a href="#">Условиями использования</a> и <a
+                href="#">Политикой конфиденциальности</a>.</p>
     </div>
 </div>
 
@@ -447,6 +80,4 @@
         }
     })
 </script>
-
-</body>
-</html>
+{% endblock %}

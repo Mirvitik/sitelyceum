@@ -1,12 +1,13 @@
 import datetime
 import sqlalchemy
+from flask_login import UserMixin
 from sqlalchemy import orm
 from sqlalchemy_serializer import SerializerMixin
 from .db_session import SqlAlchemyBase
 from flask import url_for
 
 
-class Notebook(SqlAlchemyBase, SerializerMixin):
+class Notebook(SqlAlchemyBase, UserMixin, SerializerMixin):
     __tablename__ = 'notebooks'
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)

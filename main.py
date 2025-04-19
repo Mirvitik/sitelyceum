@@ -1,11 +1,17 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
+from sqlalchemy import func
+from waitress import serve
+from flask_login import current_user, login_user, logout_user, LoginManager, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.utils import secure_filename
 import secrets
+
+from werkzeug.utils import secure_filename
+
 from data import db_session
 from data.db_session import SqlAlchemyBase
+from forms.loginform import LoginForm
+from forms.regform import RegForm
 from mail_sender import send_mail
-from functools import wraps
 import os
 from data.users import User
 from data.notebooks import Notebook
@@ -21,6 +27,10 @@ app.register_blueprint(api, url_prefix='/api/v1')
 
 RECAPTCHA_SITE_KEY = "6LfTle8qAAAAAEDmrvrsjVkNClyDNl7-p6m1OzDU"
 RECAPTCHA_SECRET_KEY = "6LfTle8qAAAAADmIekuS60zE3LrpnHlkwM1x9FiF"
+app.config['RECAPTCHA_PUBLIC_KEY'] = RECAPTCHA_SITE_KEY
+app.config['RECAPTCHA_PRIVATE_KEY'] = RECAPTCHA_SECRET_KEY
+login_manager = LoginManager()
+login_manager.init_app(app)
 
 os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'avatars'), exist_ok=True)
 os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'notebooks'), exist_ok=True)
@@ -41,15 +51,10 @@ def init_db():
     db_sess.close()
 
 
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if 'user_id' not in session:
-            flash('Пожалуйста, войдите в систему', 'warning')
-            return redirect(url_for('login', next=request.url))
-        return f(*args, **kwargs)
-
-    return decorated_function
+@login_manager.user_loader
+def load_user(user_id):
+    db_sess = db_session.create_session()
+    return db_sess.get(User, user_id)
 
 
 @app.route('/')
@@ -63,9 +68,10 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    form = LoginForm()
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
+        email = form.email.data
+        password = form.password.data
 
         db_sess = db_session.create_session()
         user = db_sess.query(User).filter(User.email == email).first()
@@ -88,13 +94,13 @@ def login():
             session['user_id'] = user.id
             session['user_name'] = f"{user.first_name} {user.last_name}"
             session['email_verified'] = True
-
+            login_user(user, remember=True)
             flash('Вы успешно вошли в систему', 'success')
             return redirect(url_for('profile'))
 
         flash('Неверный email или пароль', 'danger')
 
-    return render_template('login.html', recaptcha_site_key=RECAPTCHA_SITE_KEY)
+    return render_template('login.html', recaptcha_site_key=RECAPTCHA_SITE_KEY, form=form)
 
 
 @app.route('/verify_email', methods=['GET', 'POST'])
@@ -133,14 +139,14 @@ def verify_email():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    form = RegForm()
     if request.method == 'POST':
-        first_name = request.form.get('first-name')
-        last_name = request.form.get('last-name')
-        email = request.form.get('email')
-        phone = request.form.get('phone')
-        password = request.form.get('password')
-        confirm_password = request.form.get('confirm-password')
-
+        first_name = form.first_name.data
+        last_name = form.last_name.data
+        email = form.email.data
+        phone = form.phone.data
+        password = form.password.data
+        confirm_password = form.confirm_password.data
         if not all([first_name, last_name, email, phone, password, confirm_password]):
             flash('Пожалуйста, заполните все поля', 'danger')
         elif password != confirm_password:
@@ -151,7 +157,6 @@ def register():
                 if db_sess.query(User).filter(User.email == email).first():
                     flash('Пользователь с таким email уже существует', 'danger')
                     return redirect(url_for('register'))
-
                 verification_code = ''.join([str(secrets.randbelow(10)) for _ in range(6)])
                 session['verification_code'] = verification_code
                 session['verification_email'] = email
@@ -180,7 +185,7 @@ def register():
             finally:
                 db_sess.close()
 
-    return render_template('reg.html', recaptcha_site_key=RECAPTCHA_SITE_KEY)
+    return render_template('reg.html', form=form)
 
 
 @app.route('/update_profile', methods=['POST'])
@@ -254,7 +259,7 @@ def add_notebook():
                 company=company,
                 price=int(price),
                 description=description,
-                user_id=session['user_id']
+                user_id=current_user.id
             )
             db_sess.add(notebook)
             db_sess.commit()
@@ -323,10 +328,11 @@ def delete_notebook(notebook_id):
     db_sess = db_session.create_session()
     notebook = db_sess.query(Notebook).filter(
         Notebook.id == notebook_id,
-        Notebook.user_id == session['user_id']
+        Notebook.user_id == current_user.id
     ).first()
 
     if notebook:
+        os.remove(os.getcwd() + notebook.get_image_url())
         db_sess.delete(notebook)
         db_sess.commit()
         flash('Ноутбук успешно удален', 'success')
@@ -341,10 +347,9 @@ def delete_notebook(notebook_id):
 @login_required
 def profile():
     db_sess = db_session.create_session()
-    user = db_sess.query(User).get(session['user_id'])
     notebooks = db_sess.query(Notebook).filter(Notebook.user_id == session['user_id']).all()
     db_sess.close()
-    return render_template('profile_full.html', user=user, notebooks=notebooks)
+    return render_template('profile_full.html', user=current_user, notebooks=notebooks)
 
 
 # Добавим метод для получения изображений
@@ -356,6 +361,7 @@ def uploaded_file(filename):
 @app.route('/logout')
 def logout():
     session.clear()
+    logout_user()
     flash('Вы успешно вышли из системы', 'info')
     return redirect(url_for('index'))
 
@@ -363,6 +369,14 @@ def logout():
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
+
+@app.route('/detailed/<int:notebook_id>')
+def detailed(notebook_id):
+    db_sess = db_session.create_session()
+    item = db_sess.query(Notebook).filter(Notebook.id == notebook_id).first()
+    seller = db_sess.query(User).filter(User.id == item.user_id).first()
+    return render_template('moreinfo.html', id=notebook_id, item=item, seller=seller)
 
 
 @app.route('/resend_code', methods=['POST'])
@@ -386,3 +400,4 @@ if __name__ == '__main__':
     if not os.path.exists('db'):
         os.makedirs('db')
     app.run(debug=True)
+    # serve(app, host='0.0.0.0', port=5000, threads=100)
