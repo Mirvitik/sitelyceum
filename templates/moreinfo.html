@@ -24,6 +24,11 @@
                    style="flex: 1; min-width: 200px;"><i class="fas fa-shopping-cart"></i>
                     Написать продавцу</a>
             </div>
+
+            {% if img_data %}
+            <p>Адрес, где можно купить продукт</p>
+            <img src="{{ img_data }}" alt="Image">
+            {% endif %}
         </div>
     </div>
 </section>

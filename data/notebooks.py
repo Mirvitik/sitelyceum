@@ -16,6 +16,7 @@ class Notebook(SqlAlchemyBase, UserMixin, SerializerMixin):
     price = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     description = sqlalchemy.Column(sqlalchemy.Text)
     image_path = sqlalchemy.Column(sqlalchemy.String)  # Путь к изображению
+    address = sqlalchemy.Column(sqlalchemy.String)
     created_at = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
     user_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('users.id'))
 

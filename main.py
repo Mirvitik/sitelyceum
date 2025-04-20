@@ -1,12 +1,13 @@
+import base64
+import io
+
+import requests
+from PIL import Image
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
-from sqlalchemy import func
-from waitress import serve
+from waitress import serve # serve для выкладывание сайта на сервер
 from flask_login import current_user, login_user, logout_user, LoginManager, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
-
-from werkzeug.utils import secure_filename
-
 from data import db_session
 from data.db_session import SqlAlchemyBase
 from forms.loginform import LoginForm
@@ -24,6 +25,8 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB
 app.register_blueprint(api, url_prefix='/api/v1')
+
+API_KEY_STATIC = 'f3a0fe3a-b07e-4840-a1da-06f18b2ddf13'
 
 RECAPTCHA_SITE_KEY = "6LfTle8qAAAAAEDmrvrsjVkNClyDNl7-p6m1OzDU"
 RECAPTCHA_SECRET_KEY = "6LfTle8qAAAAADmIekuS60zE3LrpnHlkwM1x9FiF"
@@ -246,6 +249,7 @@ def add_notebook():
         company = request.form.get('company')
         price = request.form.get('price')
         description = request.form.get('description')
+        address = request.form.get('address')
         file = request.files.get('image')
 
         if not all([model, company, price]):
@@ -259,7 +263,8 @@ def add_notebook():
                 company=company,
                 price=int(price),
                 description=description,
-                user_id=current_user.id
+                user_id=current_user.id,
+                address=address
             )
             db_sess.add(notebook)
             db_sess.commit()
@@ -376,7 +381,43 @@ def detailed(notebook_id):
     db_sess = db_session.create_session()
     item = db_sess.query(Notebook).filter(Notebook.id == notebook_id).first()
     seller = db_sess.query(User).filter(User.id == item.user_id).first()
-    return render_template('moreinfo.html', id=notebook_id, item=item, seller=seller)
+    server_address = 'http://geocode-maps.yandex.ru/1.x/?'
+    api_key = '8013b162-6b42-4997-9691-77b7074026e0'
+    geocode = item.address
+    geocoder_request = f'{server_address}apikey={api_key}&geocode={geocode}&format=json'
+
+    # Выполняем запрос.
+    response = requests.get(geocoder_request)
+    print(response)
+    print(response.content)
+    if response:
+        # Запрос успешно выполнен, печатаем полученные данные.
+        map_ll = \
+            list(map(float,
+                     response.json()["response"]['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point'][
+                         'pos'].split()))
+        map_params = {
+            "ll": ','.join(map(str, map_ll)),
+            'z': 14,
+            'apikey': API_KEY_STATIC,
+            'theme': 'light',
+            'pt': ','.join(map(str, map_ll)) + ',org'
+        }
+        response = requests.get('https://static-maps.yandex.ru/v1',
+                                params=map_params)
+        print(response)
+        img = io.BytesIO(response.content)
+        image = Image.open(img)
+        # Преобразуем изображение в base64
+        buffered = io.BytesIO()
+        image.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+
+        # Формируем строку для использования в HTML
+        img_data = f"data:image/png;base64,{img_str}"
+    else:
+        img_data=''
+    return render_template('moreinfo.html', id=notebook_id, item=item, seller=seller, img_data=img_data)
 
 
 @app.route('/resend_code', methods=['POST'])
