@@ -4,7 +4,7 @@ import io
 import requests
 from PIL import Image
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
-from waitress import serve # serve для выкладывание сайта на сервер
+from waitress import serve  # serve для выкладывание сайта на сервер
 from flask_login import current_user, login_user, logout_user, LoginManager, login_required
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
@@ -337,7 +337,8 @@ def delete_notebook(notebook_id):
     ).first()
 
     if notebook:
-        os.remove(os.getcwd() + notebook.get_image_url())
+        if 'no-image.png' not in notebook.get_image_url():
+            os.remove(os.getcwd() + notebook.get_image_url())
         db_sess.delete(notebook)
         db_sess.commit()
         flash('Ноутбук успешно удален', 'success')
@@ -381,42 +382,45 @@ def detailed(notebook_id):
     db_sess = db_session.create_session()
     item = db_sess.query(Notebook).filter(Notebook.id == notebook_id).first()
     seller = db_sess.query(User).filter(User.id == item.user_id).first()
-    server_address = 'http://geocode-maps.yandex.ru/1.x/?'
-    api_key = '8013b162-6b42-4997-9691-77b7074026e0'
-    geocode = item.address
-    geocoder_request = f'{server_address}apikey={api_key}&geocode={geocode}&format=json'
+    try:
+        server_address = 'http://geocode-maps.yandex.ru/1.x/?'
+        api_key = '8013b162-6b42-4997-9691-77b7074026e0'
+        geocode = item.address
+        geocoder_request = f'{server_address}apikey={api_key}&geocode={geocode}&format=json'
 
-    # Выполняем запрос.
-    response = requests.get(geocoder_request)
-    print(response)
-    print(response.content)
-    if response:
-        # Запрос успешно выполнен, печатаем полученные данные.
-        map_ll = \
-            list(map(float,
-                     response.json()["response"]['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point'][
-                         'pos'].split()))
-        map_params = {
-            "ll": ','.join(map(str, map_ll)),
-            'z': 14,
-            'apikey': API_KEY_STATIC,
-            'theme': 'light',
-            'pt': ','.join(map(str, map_ll)) + ',org'
-        }
-        response = requests.get('https://static-maps.yandex.ru/v1',
-                                params=map_params)
+        # Выполняем запрос.
+        response = requests.get(geocoder_request)
         print(response)
-        img = io.BytesIO(response.content)
-        image = Image.open(img)
-        # Преобразуем изображение в base64
-        buffered = io.BytesIO()
-        image.save(buffered, format="PNG")
-        img_str = base64.b64encode(buffered.getvalue()).decode()
+        print(response.content)
+        if response:
+            # Запрос успешно выполнен, печатаем полученные данные.
+            map_ll = \
+                list(map(float,
+                         response.json()["response"]['GeoObjectCollection']['featureMember'][0]['GeoObject']['Point'][
+                             'pos'].split()))
+            map_params = {
+                "ll": ','.join(map(str, map_ll)),
+                'z': 14,
+                'apikey': API_KEY_STATIC,
+                'theme': 'light',
+                'pt': ','.join(map(str, map_ll)) + ',org'
+            }
+            response = requests.get('https://static-maps.yandex.ru/v1',
+                                    params=map_params)
+            print(response)
+            img = io.BytesIO(response.content)
+            image = Image.open(img)
+            # Преобразуем изображение в base64
+            buffered = io.BytesIO()
+            image.save(buffered, format="PNG")
+            img_str = base64.b64encode(buffered.getvalue()).decode()
 
-        # Формируем строку для использования в HTML
-        img_data = f"data:image/png;base64,{img_str}"
-    else:
-        img_data=''
+            # Формируем строку для использования в HTML
+            img_data = f"data:image/png;base64,{img_str}"
+        else:
+            img_data = ''
+    except Exception:
+        img_data = ''
     return render_template('moreinfo.html', id=notebook_id, item=item, seller=seller, img_data=img_data)
 
 
@@ -440,5 +444,5 @@ if __name__ == '__main__':
     init_db()
     if not os.path.exists('db'):
         os.makedirs('db')
-    app.run(debug=True)
-    # serve(app, host='0.0.0.0', port=5000, threads=100)
+    # app.run(debug=True)
+    serve(app, host='0.0.0.0', port=5000, threads=100)
