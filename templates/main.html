@@ -1,226 +1,240 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- Hero Section -->
-<section id="main" class="hero py-5 bg-light">
-    <div class="container text-center py-5">
-        <h1 class="display-4 fw-bold mb-4">Добро пожаловать в LightWeb!</h1>
-        <p class="lead mb-4">Мы предлагаем новейшие ноутбуки с лучшим соотношением цены и качества. Технологии будущего уже сегодня.</p>
-        <div class="d-flex justify-content-center gap-3">
-            <a href="#catalog" class="btn btn-primary btn-lg px-4">Каталог товаров</a>
-            <a href="#product" class="btn btn-outline-primary btn-lg px-4">Товар месяца</a>
+    <!-- Герой секция -->
+    <section id="main" class="hero">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <h1>Добро пожаловать в LightWeb!</h1>
+                    <p class="mb-5">Мы предлагаем новейшие ноутбуки с лучшим соотношением цены и качества. Технологии будущего уже сегодня.</p>
+                    <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                        <a href="#catalog" class="btn btn-primary btn-lg">Каталог товаров</a>
+                        <a href="#product" class="btn btn-outline-primary btn-lg">Товар месяца</a>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- Catalog Section -->
-<section id="catalog" class="py-5">
-    <div class="container">
-        <h2 class="text-center mb-5">Каталог ноутбуков</h2>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-            {% for notebook in notebooks %}
-            <div class="col">
-                <div class="card h-100 shadow-sm">
-                    <div class="product-img-container" style="height: 200px; overflow: hidden;">
-                        <img src="{{ notebook.get_image_url() }}" class="card-img-top h-100 object-fit-cover" alt="{{ notebook.company }} {{ notebook.model }}">
-                    </div>
-                    <div class="card-body d-flex flex-column">
-                        <h3 class="card-title h5">{{ notebook.company }} {{ notebook.model }}</h3>
-                        <p class="card-text"><strong>Цена:</strong> {{ notebook.price }} руб.</p>
-                        <p class="card-text flex-grow-1">{{ notebook.description }}</p>
-                        <a href="detailed/{{notebook.id}}" class="btn btn-primary mt-auto">Подробнее</a>
+    <!-- Каталог ноутбуков -->
+    <section id="catalog" class="bg-light">
+        <div class="container">
+            <h2 class="section-title text-center">Каталог ноутбуков</h2>
+            <div class="row g-4">
+                {% for notebook in notebooks %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card product-card">
+                        <div class="product-img-container">
+                            <img src="{{ notebook.get_image_url() }}" class="card-img-top" alt="{{ notebook.company }} {{ notebook.model }}">
+                        </div>
+                        <div class="card-body">
+                            <h3 class="product-title">{{ notebook.company }} {{ notebook.model }}</h3>
+                            <p class="product-price">{{ notebook.price }} руб.</p>
+                            <p class="product-description">{{ notebook.description }}</p>
+                            <a href="/detailed/{{ notebook.id }}" class="btn btn-primary w-100">Подробнее</a>
+                        </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- About Section -->
-<section id="about" class="py-5 bg-light">
-    <div class="container">
-        <h2 class="text-center mb-5">О проекте</h2>
-        <div class="row">
-            <div class="col-lg-8 mx-auto text-center mb-5">
-                <p class="lead">LightWeb - это не просто магазин ноутбуков, а сообщество технологических энтузиастов. Наша миссия - сделать передовые технологии доступными для каждого.</p>
-                <p>Мы тщательно отбираем каждый продукт в нашем каталоге, чтобы предложить вам только лучшее. Наши эксперты всегда готовы помочь с выбором и ответить на любые вопросы.</p>
+    <!-- О проекте -->
+    <section id="about">
+        <div class="container">
+            <h2 class="section-title text-center">О проекте</h2>
+            <div class="row mb-5">
+                <div class="col-lg-8 mx-auto text-center">
+                    <p class="lead">LightWeb - это не просто магазин ноутбуков, а сообщество технологических энтузиастов. Наша миссия - сделать передовые технологии доступными для каждого.</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card feature-card">
+                        <div class="card-body">
+                            <i class="fas fa-check-circle feature-icon"></i>
+                            <h3 class="feature-title">Гарантия качества</h3>
+                            <p class="feature-text">Все товары проходят тщательную проверку перед продажей</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card">
+                        <div class="card-body">
+                            <i class="fas fa-headset feature-icon"></i>
+                            <h3 class="feature-title">Поддержка 24/7</h3>
+                            <p class="feature-text">Наша служба поддержки всегда готова помочь</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card">
+                        <div class="card-body">
+                            <i class="fas fa-truck feature-icon"></i>
+                            <h3 class="feature-title">Быстрая доставка</h3>
+                            <p class="feature-text">Доставим ваш заказ в кратчайшие сроки</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm text-center p-4">
-                    <div class="mb-3">
-                        <i class="fas fa-check-circle text-primary" style="font-size: 2.5rem;"></i>
-                    </div>
-                    <h3 class="h5">Гарантия качества</h3>
-                    <p class="mb-0">Все товары проходят тщательную проверку перед продажей</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm text-center p-4">
-                    <div class="mb-3">
-                        <i class="fas fa-headset text-primary" style="font-size: 2.5rem;"></i>
-                    </div>
-                    <h3 class="h5">Поддержка 24/7</h3>
-                    <p class="mb-0">Наша служба поддержки всегда готова помочь</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100 border-0 shadow-sm text-center p-4">
-                    <div class="mb-3">
-                        <i class="fas fa-truck text-primary" style="font-size: 2.5rem;"></i>
-                    </div>
-                    <h3 class="h5">Быстрая доставка</h3>
-                    <p class="mb-0">Доставим ваш заказ в кратчайшие сроки</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+    </section>
 
-<!-- Contact Section -->
-<section id="contact" class="py-5">
-    <div class="container">
-        <h2 class="text-center mb-5">Связь с менеджером</h2>
-        <p class="text-center mb-5">Мы всегда рады помочь вам с выбором и ответить на любые вопросы. Свяжитесь с нами удобным для вас способом:</p>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body text-center p-4">
-                        <i class="fas fa-phone-alt text-primary mb-3" style="font-size: 2rem;"></i>
-                        <h3 class="h5">Телефон</h3>
-                        <p class="mb-0">+7 (123) 456-78-90</p>
+    <!-- Контакты -->
+    <section id="contact" class="bg-light">
+        <div class="container">
+            <h2 class="section-title text-center">Связь с менеджером</h2>
+            <p class="text-center mb-5">Мы всегда рады помочь вам с выбором и ответить на любые вопросы. Свяжитесь с нами удобным для вас способом:</p>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card contact-card">
+                        <div class="card-body d-flex align-items-center">
+                            <i class="fas fa-phone-alt contact-icon"></i>
+                            <div>
+                                <h3 class="contact-title">Телефон</h3>
+                                <p class="mb-0">+7 (123) 456-78-90</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body text-center p-4">
-                        <i class="fas fa-envelope text-primary mb-3" style="font-size: 2rem;"></i>
-                        <h3 class="h5">Email</h3>
-                        <p class="mb-0">info@lightweb.ru</p>
+                <div class="col-md-4">
+                    <div class="card contact-card">
+                        <div class="card-body d-flex align-items-center">
+                            <i class="fas fa-envelope contact-icon"></i>
+                            <div>
+                                <h3 class="contact-title">Email</h3>
+                                <p class="mb-0">info@lightweb.ru</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body text-center p-4">
-                        <i class="fas fa-map-marker-alt text-primary mb-3" style="font-size: 2rem;"></i>
-                        <h3 class="h5">Офис</h3>
-                        <p class="mb-0">Курск, ул. Радищева 33</p>
+                <div class="col-md-4">
+                    <div class="card contact-card">
+                        <div class="card-body d-flex align-items-center">
+                            <i class="fas fa-map-marker-alt contact-icon"></i>
+                            <div>
+                                <h3 class="contact-title">Офис</h3>
+                                <p class="mb-0">Курск, ул. Радищева 33</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- Partners Section -->
-<section id="partners" class="py-5 bg-light">
-    <div class="container">
-        <h2 class="text-center mb-5">Наши партнёры</h2>
-        <p class="text-center mb-5">Мы сотрудничаем с ведущими мировыми брендами, чтобы предложить вам лучшую технику:</p>
-        <div class="row g-4 align-items-center">
-            <div class="col-6 col-md-4 col-lg-2">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/HP_logo_2012.svg/1200px-HP_logo_2012.svg.png" alt="HP" class="img-fluid">
-            </div>
-            <div class="col-6 col-md-4 col-lg-2">
-                <img src="https://rackmarket.ru/upload/iblock/205/205c7c351cc7e2e64532bf636b8f96c2.jpg" alt="Dell" class="img-fluid">
-            </div>
-            <div class="col-6 col-md-4 col-lg-2">
-                <img src="https://aksess.ru/upload/iblock/1c6/kvrh3dkw3vo0bozi2o29znoagtwvf9od.jpg" alt="Lenovo" class="img-fluid">
-            </div>
-            <div class="col-6 col-md-4 col-lg-2">
-                <img src="https://ltstore.ru/wa-data/public/shop/categories/1043/94.png" alt="Asus" class="img-fluid">
-            </div>
-            <div class="col-6 col-md-4 col-lg-2">
-                <img src="https://aksess.ru/upload/iblock/5c4/b7kxh263fwwyd968j135bq9ir8vabxvp.png" alt="Acer" class="img-fluid">
+    <!-- Партнеры -->
+    <section id="partners">
+        <div class="container">
+            <h2 class="section-title text-center">Наши партнёры</h2>
+            <p class="text-center mb-5">Мы сотрудничаем с ведущими мировыми брендами, чтобы предложить вам лучшую технику:</p>
+            <div class="row justify-content-center g-4">
+                <div class="col-6 col-sm-4 col-md-2 text-center">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ad/HP_logo_2012.svg/1200px-HP_logo_2012.svg.png" alt="HP" class="img-fluid partner-logo">
+                </div>
+                <div class="col-6 col-sm-4 col-md-2 text-center">
+                    <img src="https://orgcentr5.ru/img/brands/82cec96096d4281b7c95cd7e74623496.png" alt="Dell" class="img-fluid partner-logo">
+                </div>
+                <div class="col-6 col-sm-4 col-md-2 text-center">
+                    <img src="https://service-mobile23.ru/wp-content/uploads/2020/08/lenovo-logo.png" alt="Lenovo" class="img-fluid partner-logo">
+                </div>
+                <div class="col-6 col-sm-4 col-md-2 text-center">
+                    <img src="https://ltstore.ru/wa-data/public/shop/categories/1043/94.png" alt="Asus" class="img-fluid partner-logo">
+                </div>
+                <div class="col-6 col-sm-4 col-md-2 text-center">
+                    <img src="https://vectorseek.com/wp-content/uploads/2023/10/Acer-Black-Logo-Vector.svg-.png" alt="Acer" class="img-fluid partner-logo">
+                </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- Product of the Month Section -->
-<section id="product" class="py-5">
-    <div class="container">
-        <h2 class="text-center mb-5">Товар месяца</h2>
-        <div class="row align-items-center g-5">
-            <div class="col-lg-6">
-                <img src="https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Ноутбук месяца" class="img-fluid rounded shadow">
-            </div>
-            <div class="col-lg-6">
-                <h3 class="mb-3">Gamer Ultimate RTX</h3>
-                <p class="lead">Этот мощный игровой ноутбук оснащен новейшей видеокартой NVIDIA RTX 4090 и процессором Intel Core i9 13-го поколения. Идеальный выбор для профессиональных геймеров и создателей контента.</p>
-                <ul class="mb-4">
-                    <li class="mb-2">17.3" дисплей 4K 144Hz</li>
-                    <li class="mb-2">32GB оперативной памяти DDR5</li>
-                    <li class="mb-2">2TB SSD NVMe</li>
-                    <li class="mb-2">Механическая клавиатура RGB</li>
-                </ul>
-                <div class="d-flex gap-3">
-                    <a href="#" class="btn btn-primary flex-grow-1">Купить сейчас</a>
-                    <a href="#" class="btn btn-outline-primary flex-grow-1">Подробнее</a>
+    <!-- Товар месяца -->
+    <section id="product" class="bg-light">
+        <div class="container">
+            <h2 class="section-title text-center">Товар месяца</h2>
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <img src="https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Ноутбук месяца" class="img-fluid rounded shadow">
+                </div>
+                <div class="col-lg-6">
+                    <h3 class="mb-4">Gamer Ultimate RTX</h3>
+                    <p class="lead mb-4">Этот мощный игровой ноутбук оснащен новейшей видеокартой NVIDIA RTX 4090 и процессором Intel Core i9 13-го поколения. Идеальный выбор для профессиональных геймеров и создателей контента.</p>
+                    <ul class="mb-4">
+                        <li class="mb-2">17.3" дисплей 4K 144Hz</li>
+                        <li class="mb-2">32GB оперативной памяти DDR5</li>
+                        <li class="mb-2">2TB SSD NVMe</li>
+                        <li class="mb-2">Механическая клавиатура RGB</li>
+                    </ul>
+                    <div class="d-grid gap-3 d-sm-flex">
+                        <a href="#" class="btn btn-primary btn-lg">Купить сейчас</a>
+                        <a href="#" class="btn btn-outline-primary btn-lg">Подробнее</a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 
-<!-- FAQ Section -->
-<section id="faq" class="py-5 bg-light">
-    <div class="container">
-        <h2 class="text-center mb-5">Часто задаваемые вопросы</h2>
-        <div class="accordion" id="faqAccordion">
-            <div class="accordion-item">
-                <h3 class="accordion-header">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
-                        Какой срок доставки?
-                    </button>
-                </h3>
-                <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
-                    <div class="accordion-body">
-                        Доставка по Курску осуществляется в течение 1-2 рабочих дней. В регионы России доставка занимает от 3 до 7 рабочих дней в зависимости от удаленности.
-                    </div>
-                </div>
-            </div>
-            <div class="accordion-item">
-                <h3 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
-                        Какая гарантия на ноутбуки?
-                    </button>
-                </h3>
-                <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                    <div class="accordion-body">
-                        Все ноутбуки имеют официальную гарантию производителя от 1 года. На некоторые модели предоставляется расширенная гарантия до 3 лет. Подробности уточняйте у менеджеров.
-                    </div>
-                </div>
-            </div>
-            <div class="accordion-item">
-                <h3 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
-                        Можно ли вернуть товар?
-                    </button>
-                </h3>
-                <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                    <div class="accordion-body">
-                        Да, в соответствии с законом о защите прав потребителей, вы можете вернуть товар в течение 14 дней с момента покупки, если он не был в употреблении и сохранены все оригинальные упаковки и документы.
-                    </div>
-                </div>
-            </div>
-            <div class="accordion-item">
-                <h3 class="accordion-header">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
-                        Есть ли рассрочка или кредит?
-                    </button>
-                </h3>
-                <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
-                    <div class="accordion-body">
-                        Мы сотрудничаем с несколькими банками и можем предложить вам выгодные условия кредита или рассрочки на 6-12 месяцев без переплат. Для оформления потребуется только паспорт.
+    <!-- FAQ -->
+    <section id="faq">
+        <div class="container">
+            <h2 class="section-title text-center">Часто задаваемые вопросы</h2>
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h3 class="accordion-header" id="headingOne">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                    Какой срок доставки?
+                                </button>
+                            </h3>
+                            <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Доставка по Курску осуществляется в течение 1-2 рабочих дней. В регионы России доставка занимает от 3 до 7 рабочих дней в зависимости от удаленности.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h3 class="accordion-header" id="headingTwo">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                                    Какая гарантия на ноутбуки?
+                                </button>
+                            </h3>
+                            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Все ноутбуки имеют официальную гарантию производителя от 1 года. На некоторые модели предоставляется расширенная гарантия до 3 лет. Подробности уточняйте у менеджеров.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h3 class="accordion-header" id="headingThree">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">
+                                    Можно ли вернуть товар?
+                                </button>
+                            </h3>
+                            <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Да, в соответствии с законом о защите прав потребителей, вы можете вернуть товар в течение 14 дней с момента покупки, если он не был в употреблении и сохранены все оригинальные упаковки и документы.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="accordion-item">
+                            <h3 class="accordion-header" id="headingFour">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour">
+                                    Есть ли рассрочка или кредит?
+                                </button>
+                            </h3>
+                            <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Мы сотрудничаем с несколькими банками и можем предложить вам выгодные условия кредита или рассрочки на 6-12 месяцев без переплат. Для оформления потребуется только паспорт.
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
+</body>
 {% endblock %}
