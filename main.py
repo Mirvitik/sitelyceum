@@ -196,7 +196,7 @@ def register():
 def update_profile():
     data = request.get_json()
     db_sess = db_session.create_session()
-    user = db_sess.query(User).get(session['user_id'])
+    user = db_sess.get(User, session['user_id'])
 
     if 'first_name' in data:
         user.first_name = data['first_name']

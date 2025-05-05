@@ -549,7 +549,7 @@
                     {% if 'user_id' in session %}
                     <div class="dropdown">
                         <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
-                            <i class="fas fa-user-circle me-1"></i> {{ session.get('user_name', 'Пользователь') }}
+                            <i class="fas fa-user-circle me-1"></i>{{ current_user.first_name }} {{current_user.last_name}}
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{{ url_for('profile') }}"><i class="fas fa-user me-1"></i> Личный кабинет</a></li>

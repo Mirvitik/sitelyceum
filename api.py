@@ -124,7 +124,6 @@ def get_notebook(notebook_id):
 
 
 @api.route('/notebooks', methods=['POST'])
-@login_required_api
 def create_notebook(user):
     data = request.get_json()
     if not all(key in data for key in ['model', 'company', 'price']):
@@ -149,7 +148,6 @@ def create_notebook(user):
 
 
 @api.route('/notebooks/<int:notebook_id>', methods=['PUT'])
-@login_required_api
 def update_notebook(user, notebook_id):
     db_sess = create_session()
     notebook = db_sess.query(Notebook).get(notebook_id)
@@ -170,7 +168,6 @@ def update_notebook(user, notebook_id):
 
 
 @api.route('/notebooks/<int:notebook_id>', methods=['DELETE'])
-@login_required_api
 def delete_notebook(user, notebook_id):
     db_sess = create_session()
     notebook = db_sess.query(Notebook).get(notebook_id)
@@ -185,11 +182,10 @@ def delete_notebook(user, notebook_id):
     return jsonify({'message': 'Notebook deleted successfully'})
 
 
-@api.route('/users/notebooks', methods=['GET'])
-@login_required_api
+@api.route('/users/notebooks/<int:user>', methods=['GET'])
 def get_user_notebooks(user):
     db_sess = create_session()
-    notebooks = db_sess.query(Notebook).filter(Notebook.user_id == user.id).all()
+    notebooks = db_sess.query(Notebook).filter(Notebook.user_id == user).all()
 
     return jsonify({
         'notebooks': [{
