@@ -1,0 +1,25 @@
+# Python
+*.pyc
+*.pyo
+__pycache__/
+
+# venv
+venv/
+env/
+
+# Configuration files
+*.env
+*.local
+
+# Database
+database.db
+
+# Static
+staticfiles/
+media/
+
+# Logs
+*.log
+
+# Other files
+*.pot
